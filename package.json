@@ -1,0 +1,14 @@
+{
+  "name": "spotify-playlist",
+  "version": "1.0.0",
+  "description": "Node code to get Playlist tracks and print in screen with an specific format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gorzas",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "request": "~2.53.0"
+  }
+}
