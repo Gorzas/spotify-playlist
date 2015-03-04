@@ -4,7 +4,7 @@ A brief example of the usage of the Spotify API with Node. The code connects
 with the Spotify API and it retrieves all the songs of an specific playlist.
 Then, it exports the metadata to a text file in markdown format.
 
-## Usage:
+# Usage
 
 1. Ensure that Node.js is installed
 2. Run `npm install` to ensure the required dependencies are installed
