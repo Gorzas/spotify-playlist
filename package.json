@@ -9,6 +9,6 @@
   "author": "Gorzas",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "request": "~2.53.0"
+    "request": "~2.88.2"
   }
 }
