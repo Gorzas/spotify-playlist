@@ -19,6 +19,7 @@ var request = require('request');
 var fs = require('fs');
 var config = require('./config.json');
 var auth_options, user_id, playlist_id;
+const limit = 100;
 
 // Functions
 /**
@@ -123,7 +124,7 @@ function get_tracks(tracks) {
  * export_playlist_tracks
  * ----------------------
  *
- * Receives a JSON Object and exports it in a text file.
+ * Receives an Array of songs and exports it in a text file.
  *
  * The text file is an ordered list in markdown with a list of the total of
  * artists of the playlist.
@@ -131,12 +132,11 @@ function get_tracks(tracks) {
  * This is an example of retrieving data with the Spotify API and you can
  * modify this code as you like.
  *
- * @param  {Object} json JSON response of the Spotify API
+ * @param  {Array} items Array items response from the Spotify API
  *
  * @return {Boolean}     True if everything went OK
  */
-function export_playlist_tracks(json) {
-  var items = json.items;
+function export_playlist_tracks(items) {
   var tags = [];
   var text = 'Playlist id: ' + playlist_id +'\n\n';
   var songs = [];
@@ -201,30 +201,43 @@ auth_options = {
 console.log('Fetching access token');
 console.log('---------------------');
 
-request.post(auth_options, function (err, resp, body) {
-  var options, token;
+async function getTracks(token, offset) {
+  const res = await fetch(
+    `https://api.spotify.com/v1/users/${user_id}/playlists/${playlist_id}/tracks?limit=${limit}&offset=${offset}`,
+    {
+      headers: {
+        'Authorization' : 'Bearer ' + token
+      }
+    }
+  );
 
+  return res.json();
+}
+
+request.post(auth_options, async function (err, resp, body) {
   if (!err && resp.statusCode === 200) {
-    token = body.access_token;
+    const token = body.access_token;
 
     console.log('\n');
     console.log('Retrieving songs');
     console.log('---------------------');
 
-    options = {
-      uri : 'https://api.spotify.com/v1/users/' + user_id +
-        '/playlists/' + playlist_id + '/tracks',
-      headers : {
-        'Authorization' : 'Bearer ' + token
-      },
-      json : true
-    };
+    let offset = 0;
+    let total = 0;
+    const items = [];
 
-    request.get(options, function (err, resp, body) {
-      if (!err && resp.statusCode === 200) {
-        // handle the tracks list
-        export_playlist_tracks(body);
+    while (offset <= total ) {
+      const res = await getTracks(token, offset);
+
+      if (!total) {
+        total = res.total;
       }
-    });
+
+      items.push(...res.items);
+
+      offset += 100;
+    }
+
+    export_playlist_tracks(items);
   }
 });

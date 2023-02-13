@@ -10,5 +10,8 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "request": "~2.88.2"
+  },
+  "engines" : {
+    "node" : ">=18.0.0"
   }
 }
