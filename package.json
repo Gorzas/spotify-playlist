@@ -4,7 +4,8 @@
   "description": "Node code to get Playlist tracks and print in screen with an specific format",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check-songs": "node node/checkSongs.js"
   },
   "author": "Gorzas",
   "license": "BSD-2-Clause",
