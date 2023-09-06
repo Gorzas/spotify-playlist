@@ -14,10 +14,9 @@
  **/
 
 // Variables
-var url_token = 'https://accounts.spotify.com/api/token';
-var request = require('request');
+const urlToken = 'https://accounts.spotify.com/api/token';
 var config = require('./config.json');
-var auth_options, user_id, playlist_id;
+var authOptions, user_id, playlist_id;
 const limit = 100;
 
 // Functions
@@ -99,18 +98,19 @@ if (!get_args(process.argv)) {
   process.exit();
 }
 
+const authBody = new URLSearchParams({
+  grant_type : 'client_credentials',
+  client_id: config.client_id,
+  client_secret: config.client_secret
+});
+
 // connection with Spotify API to get access_token
-auth_options = {
-  url : url_token,
+authOptions = {
   headers : {
-    'Authorization' : 'Basic ' +
-      (Buffer.from(config.client_id + ':' + config.client_secret)
-        .toString('base64'))
+    'Content-Type': 'application/x-www-form-urlencoded',
   },
-  form: {
-    grant_type : 'client_credentials'
-  },
-  json : true
+  method: 'POST',
+  body: authBody.toString(),
 };
 
 console.log('Fetching access token');
@@ -129,36 +129,41 @@ async function getTracks(token, offset) {
   return res.json();
 }
 
-function getAllTracks() {
-  return new Promise((resolve /*, reject */) => {
-    request.post(auth_options, async function (err, resp, body) {
-      if (!err && resp.statusCode === 200) {
-        const token = body.access_token;
+async function getAllTracks() {
+  const items = [];
 
-        console.log('\n');
-        console.log('Retrieving songs');
-        console.log('---------------------');
+  try {
+    const response = await fetch(
+      urlToken,
+      authOptions
+    );
 
-        let offset = 0;
-        let total = 0;
-        const items = [];
+    console.log('\n');
+    console.log('Retrieving songs');
+    console.log('---------------------');
 
-        while (offset <= total ) {
-          const res = await getTracks(token, offset);
+    const { access_token: token } = await response.json();
 
-          if (!total) {
-            total = res.total;
-          }
+    let offset = 0;
+    let total = 0;
 
-          items.push(...res.items);
+    while (offset <= total ) {
+      const res = await getTracks(token, offset);
 
-          offset += 100;
-        }
-
-        resolve(items);
+      if (!total) {
+        total = res.total;
       }
-    });
-  });
+
+      items.push(...res.items);
+
+      offset += 100;
+    }
+  } catch (e) {
+    console.error('There was an error when connecting with the server\n');
+    console.error(e);
+  }
+
+  return items;
 }
 
 module.exports = getAllTracks;
